@@ -1,0 +1,23 @@
+# Local open-source data warehouse: PostgreSQL 16
+# Start:  docker compose up -d
+# Stop:   docker compose down        (add -v to also wipe the data volume)
+services:
+  warehouse:
+    image: postgres:16
+    container_name: dbt-warehouse
+    environment:
+      POSTGRES_USER: dbt
+      POSTGRES_PASSWORD: dbt
+      POSTGRES_DB: warehouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbt -d warehouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  warehouse_data:

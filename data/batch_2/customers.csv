@@ -1,0 +1,12 @@
+customer_id,first_name,last_name,email,city,country,signup_date,updated_at
+C003,rosa,Jones,rosa.Jones3@example.com,Edinburgh,UK,2026-08-06,2026-09-30 23:00:00
+C008,fiona,muller,fiona.muller8@example.com,Hamburg,Germany,2026-04-02,2026-10-01 01:00:00
+C015,CHARLIE,smith,charlie.smith15@newmail.com,Edinburgh,UK,2026-03-27,2026-09-30 23:00:00
+C041,diana,smith,diana.smith41@example.com,new york,us,2026-09-28,2026-09-28 09:00:00
+C042,tara,Kowalski,tara.Kowalski42@example.com,Manchester,UK,2026-10-01,2026-10-01 09:00:00
+C043,priya,Rossi,priya.Rossi43@example.com,london,uk,2026-09-30,2026-09-30 09:00:00
+C044,Ethan,nguyen,Ethan.nguyen44@example.com,munich,Germany,2026-10-01,2026-10-01 09:00:00
+C045,tara,Garcia,tara.Garcia45@example.com,new york,us,2026-09-28,2026-09-28 09:00:00
+C046,fiona,Jones,fiona.Jones46@example.com,Berlin,de,2026-10-01,2026-10-01 09:00:00
+C047,Quentin,O'Neil,Quentin.ONeil47@example.com,london,uk,2026-09-28,2026-09-28 09:00:00
+C048,priya,smith,priya.smith48@example.com,munich,Germany,2026-09-29,2026-09-29 09:00:00

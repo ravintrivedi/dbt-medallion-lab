@@ -1,0 +1,41 @@
+customer_id,first_name,last_name,email,city,country,signup_date,updated_at
+C001,diana,smith,diana.smith1@example.com,Austin,USA,2026-04-19,2026-04-19 08:00:00
+C002,hannah,PATEL,hannah.PATEL2@example.com,Manchester,UK,2025-09-10,2025-09-10 08:00:00
+C003,rosa,Jones,rosa.Jones3@example.com,munich,Germany,2026-08-06,2026-08-06 08:00:00
+C004,alice,Jones,alice.Jones4@example.com,new york,us,2026-04-25,2026-04-25 08:00:00
+C005,Quentin,Rossi,Quentin.Rossi5@example.com,london,uk,2025-11-08,2025-11-08 08:00:00
+C006,George,O'Neil,George.ONeil6@example.com,munich,Germany,2026-05-02,2026-05-02 08:00:00
+C007,Oscar,Rossi,  OSCAR.ROSSI7@EXAMPLE.COM ,Austin,USA,2026-08-19,2026-08-19 08:00:00
+C008,fiona,muller,fiona.muller8@example.com,Berlin,de,2026-04-02,2026-04-02 08:00:00
+C009,Ethan,Brown,Ethan.Brown9@example.com,Berlin,de,2026-07-01,2026-07-01 08:00:00
+C010,CHARLIE,muller,CHARLIE.muller10@example.com,Manchester,UK,2026-02-20,2026-02-20 08:00:00
+C011,laura,Rossi,laura.Rossi11@example.com,Austin,USA,2026-07-31,2026-07-31 08:00:00
+C012,Oscar,O'Neil,Oscar.ONeil12@example.com,Manchester,UK,2026-02-10,2026-02-10 08:00:00
+C013,CHARLIE,O'Neil,,Austin,USA,2025-10-05,2025-10-05 08:00:00
+C014,tara,Garcia,  TARA.GARCIA14@EXAMPLE.COM ,new york,us,2025-08-27,2025-08-27 08:00:00
+C015,CHARLIE,smith,CHARLIE.smith15@example.com,new york,us,2026-03-27,2026-03-27 08:00:00
+C016,CHARLIE,Brown,CHARLIE.Brown16@example.com,Manchester,UK,2026-02-09,2026-02-09 08:00:00
+C017,Ivan,Kowalski,Ivan.Kowalski17@example.com,Berlin,de,2026-05-31,2026-05-31 08:00:00
+C018,laura,Garcia,laura.Garcia18@example.com,new york,us,2025-09-13,2025-09-13 08:00:00
+C019,Ivan,Jones,Ivan.Jones19@example.com,Leeds,United Kingdom,2025-11-22,2025-11-22 08:00:00
+C020,hannah,PATEL,hannah.PATEL20@example.com,Bristol,GB,2026-02-09,2026-02-09 08:00:00
+C021,Ivan,O'Neil,  IVAN.ONEIL21@EXAMPLE.COM ,new york,us,2025-09-06,2025-09-06 08:00:00
+C022,Kofi,smith,Kofi.smith22@example.com,new york,us,2026-08-06,2026-08-06 08:00:00
+C023,Kofi,muller,Kofi.muller23@example.com,Austin,USA,2026-07-20,2026-07-20 08:00:00
+C024,George,Rossi,George.Rossi24@example.com,Berlin,de,2026-05-06,2026-05-06 08:00:00
+C025,priya,muller,priya.muller25@example.com,Bristol,GB,2026-06-10,2026-06-10 08:00:00
+C026,Ivan,PATEL,Ivan.PATEL26@example.com,new york,us,2025-08-06,2025-08-06 08:00:00
+C027,rosa,O'Neil,rosa.ONeil27@example.com,Austin,USA,2025-08-05,2025-08-05 08:00:00
+C028,Sam,muller,  SAM.MULLER28@EXAMPLE.COM ,munich,Germany,2026-02-18,2026-02-18 08:00:00
+C029,hannah,PATEL,hannah.PATEL29@example.com,Bristol,GB,2026-07-07,2026-07-07 08:00:00
+C030,Bob,Jones,Bob.Jones30@example.com,Leeds,United Kingdom,2025-10-05,2025-10-05 08:00:00
+C031,fiona,muller,fiona.muller31@example.com,Manchester,UK,2026-02-06,2026-02-06 08:00:00
+C032,Mohammed,Rossi,Mohammed.Rossi32@example.com,Bristol,GB,2025-11-25,2025-11-25 08:00:00
+C033,Ivan,O'Neil,Ivan.ONeil33@example.com,london,uk,2025-09-08,2025-09-08 08:00:00
+C034,diana,O'Neil,diana.ONeil34@example.com,Austin,USA,2025-09-28,2025-09-28 08:00:00
+C035,Kofi,Jones,  KOFI.JONES35@EXAMPLE.COM ,Austin,USA,2026-01-12,2026-01-12 08:00:00
+C036,fiona,Kowalski,fiona.Kowalski36@example.com,london,uk,2025-08-18,2025-08-18 08:00:00
+C037,Ivan,O'Neil,Ivan.ONeil37@example.com,Leeds,United Kingdom,2025-12-06,2025-12-06 08:00:00
+C038,diana,nguyen,diana.nguyen38@example.com,new york,us,2026-06-05,2026-06-05 08:00:00
+C039,laura,PATEL,laura.PATEL39@example.com,london,uk,2025-10-20,2025-10-20 08:00:00
+C040,Kofi,Kowalski,Kofi.Kowalski40@example.com,london,uk,2026-06-26,2026-06-26 08:00:00

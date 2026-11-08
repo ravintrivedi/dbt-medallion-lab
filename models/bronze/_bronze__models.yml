@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: brz_customers
+    description: Bronze view over raw.customers (no transformation).
+  - name: brz_products
+    description: Bronze view over raw.products (no transformation).
+  - name: brz_orders
+    description: Bronze view over raw.orders (no transformation, contains duplicates and status history).
+  - name: brz_order_items
+    description: Bronze view over raw.order_items (no transformation).
+  - name: brz_payments
+    description: Bronze view over raw.payments (no transformation).

@@ -1,0 +1,36 @@
+# dbt looks for profiles.yml in the current directory first, so keeping it in the
+# repo means every developer and the CI runner use the same connection logic.
+# Secrets are never hard-coded: they come from environment variables
+# (the defaults below match docker-compose.yml and are fine for a local lab only).
+medallion:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_HOST', 'localhost') }}"
+      port: "{{ env_var('DBT_PORT', '5432') | int }}"
+      user: "{{ env_var('DBT_USER', 'dbt') }}"
+      password: "{{ env_var('DBT_PASSWORD', 'dbt') }}"
+      dbname: "{{ env_var('DBT_DATABASE', 'warehouse') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'dev') }}"   # -> dev_bronze, dev_silver, dev_gold
+      threads: 4
+
+    ci:
+      type: postgres
+      host: "{{ env_var('DBT_HOST', 'localhost') }}"
+      port: "{{ env_var('DBT_PORT', '5432') | int }}"
+      user: "{{ env_var('DBT_USER', 'dbt') }}"
+      password: "{{ env_var('DBT_PASSWORD', 'dbt') }}"
+      dbname: "{{ env_var('DBT_DATABASE', 'warehouse') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'ci') }}"    # CI sets ci_pr_<number>
+      threads: 4
+
+    prod:
+      type: postgres
+      host: "{{ env_var('DBT_HOST', 'localhost') }}"
+      port: "{{ env_var('DBT_PORT', '5432') | int }}"
+      user: "{{ env_var('DBT_USER', 'dbt') }}"
+      password: "{{ env_var('DBT_PASSWORD', 'dbt') }}"
+      dbname: "{{ env_var('DBT_DATABASE', 'warehouse') }}"
+      schema: analytics                              # prod uses bronze / silver / gold exactly
+      threads: 4

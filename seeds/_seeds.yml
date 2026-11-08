@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: country_codes
+    description: Reference mapping from the free-text country values seen in source systems to ISO-3166 alpha-2 codes.
+    columns:
+      - name: raw_value
+        description: Lower-cased, trimmed country value as it appears in the source.
+        data_tests: [unique, not_null]
+      - name: country_code
+        data_tests: [not_null]

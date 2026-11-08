@@ -1,0 +1,10 @@
+# Keeps GitHub Actions and Python dependencies up to date via automatic PRs
+# (which then run through CI like any other change).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: monthly}
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: monthly}

@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Landing zone. Data arrives here exactly as the source system sent it
+      (all text, duplicates, inconsistent casing). In production this would be
+      written by Fivetran; in this lab scripts/load_raw.py plays that role.
+    schema: raw
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 72, period: hour}
+    tables:
+      - name: customers
+        description: Customer master records from the e-commerce platform. Re-sent whenever a customer changes.
+        columns:
+          - name: customer_id
+            data_tests: [not_null]
+      - name: products
+        description: Product catalogue.
+        config:
+          freshness: null   # catalogue is static in this lab
+      - name: orders
+        description: Order headers. The same order is re-sent each time its status changes.
+        columns:
+          - name: order_id
+            data_tests: [not_null]
+      - name: order_items
+        description: Order lines.
+      - name: payments
+        description: Payment transactions. An order can have more than one payment (split tender).

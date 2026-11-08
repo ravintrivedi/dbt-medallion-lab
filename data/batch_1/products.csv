@@ -1,0 +1,13 @@
+product_id,product_name,category,unit_price_cents,is_active
+P001,Trail Running Shoes,footwear,8999,TRUE
+P002,Merino Base Layer,apparel,5499,TRUE
+P003,Waterproof Jacket,apparel,14999,true
+P004,Hiking Socks (3 pack), accessories,1499,true
+P005,Insulated Bottle,accessories ,2499,true
+P006,Day Pack 20L,bags,6999,1
+P007,Trekking Poles,equipment,7999,true
+P008,Headlamp,equipment,3499,true
+P009,Rain Trousers,APPAREL,7499,1
+P010,Camp Stove,equipment,4999,false
+P011,Approach Shoes,Footwear,11999,true
+P012,Buff Neck Gaiter,accessories,1299,1

@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: slv_customers
+    description: One row per customer, latest version, cleaned and conformed (ISO country codes).
+    columns:
+      - name: customer_id
+        description: Natural key from the source system.
+        data_tests: [unique, not_null]
+      - name: email
+        description: Lower-cased, trimmed email. Null when the source sent a blank.
+        data_tests:
+          - not_null:
+              config:
+                severity: warn    # known data-quality gap: report it, don't block the pipeline
+      - name: country_code
+        description: ISO-3166 alpha-2 code mapped via the country_codes seed.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["GB", "US", "DE"]
+
+  - name: slv_products
+    description: Product catalogue with typed prices and conformed categories.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: unit_price
+        data_tests: [not_null, non_negative]
+      - name: category
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["footwear", "apparel", "accessories", "bags", "equipment"]
+
+  - name: slv_orders
+    description: >
+      One row per order with its latest status. Incremental (merge on order_id)
+      so status changes arriving in later loads update rows in place.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('slv_customers')
+                field: customer_id
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["placed", "shipped", "completed", "returned", "cancelled"]
+
+  - name: slv_order_items
+    description: Order lines, typed and de-duplicated.
+    columns:
+      - name: order_item_id
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_orders')
+                field: order_id
+              config:
+                severity: warn    # lines belonging to dropped orphan orders
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_products')
+                field: product_id
+      - name: quantity
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+
+  - name: slv_payments
+    description: Payments with amounts converted from minor units.
+    columns:
+      - name: payment_id
+        data_tests: [unique, not_null]
+      - name: amount
+        data_tests: [not_null, non_negative]
+      - name: payment_method
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["credit_card", "paypal", "bank_transfer", "gift_card"]
+
+unit_tests:
+  - name: test_slv_orders_dedupes_and_normalises_status
+    description: >
+      The latest version of each order wins, status variants are conformed,
+      and orders without a customer are dropped.
+    model: slv_orders
+    overrides:
+      macros:
+        is_incremental: false    # test the full-refresh logic path
+    given:
+      - input: ref('brz_orders')
+        rows:
+          - {order_id: O1, customer_id: C1, order_date: "2026-09-01", status: " PLACED", updated_at: "2026-09-01 10:00:00", _loaded_at: "2026-09-01 12:00:00"}
+          - {order_id: O1, customer_id: C1, order_date: "2026-09-01", status: "complete", updated_at: "2026-09-03 10:00:00", _loaded_at: "2026-09-04 12:00:00"}
+          - {order_id: O2, customer_id: C2, order_date: "2026-09-02", status: "Canceled", updated_at: "2026-09-02 10:00:00", _loaded_at: "2026-09-02 12:00:00"}
+          - {order_id: O3, customer_id: null, order_date: "2026-09-02", status: "placed", updated_at: "2026-09-02 10:00:00", _loaded_at: "2026-09-02 12:00:00"}
+    expect:
+      rows:
+        - {order_id: O1, customer_id: C1, order_status: completed}
+        - {order_id: O2, customer_id: C2, order_status: cancelled}

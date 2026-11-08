@@ -1,0 +1,99 @@
+# Continuous Integration: runs on every pull request into main.
+#
+#   lint  -> SQLFluff (no database needed, fails fast on style issues)
+#   build -> spins up a throw-away Postgres, lands raw data, runs the whole
+#            medallion pipeline twice (initial load + incremental load) and
+#            runs every test. A PR can only merge if both jobs are green
+#            (enforce that with a branch protection rule on main).
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true   # a new push to the PR cancels the previous run
+
+env:
+  DBT_TARGET: ci
+  DBT_HOST: localhost
+  DBT_PORT: "5432"
+  DBT_USER: dbt
+  DBT_PASSWORD: dbt          # throw-away CI database; use ${{ secrets.X }} for a real warehouse
+  DBT_DATABASE: warehouse
+  DBT_SCHEMA: ci_pr_${{ github.event.pull_request.number || github.run_id }}
+
+jobs:
+  lint:
+    name: Lint SQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: SQLFluff
+        run: sqlfluff lint models tests analyses --format github-annotation-native
+
+  build:
+    name: dbt build (ephemeral Postgres)
+    needs: lint
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: dbt
+          POSTGRES_PASSWORD: dbt
+          POSTGRES_DB: warehouse
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dbt -d warehouse"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Check connection
+        run: dbt debug
+
+      - name: Land raw data - batch 1 (initial load)
+        run: python scripts/load_raw.py --batch 1
+
+      - name: dbt build - batch 1 (full pipeline + all tests)
+        run: dbt build
+
+      - name: Land raw data - batch 2 (next day's load)
+        run: python scripts/load_raw.py --batch 2
+
+      - name: dbt build - batch 2 (proves incremental + snapshot logic)
+        run: dbt build
+
+      - name: Source freshness
+        run: dbt source freshness
+
+      - name: Generate docs
+        run: dbt docs generate
+
+      - name: Upload dbt artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dbt-ci-artifacts
+          path: |
+            target/manifest.json
+            target/run_results.json
+            target/catalog.json
+            target/sources.json
+          retention-days: 7

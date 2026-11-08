@@ -1,0 +1,23 @@
+[sqlfluff]
+dialect = postgres
+# The jinja templater (with dbt builtins) lints without a database connection,
+# so the lint job in CI is fast and needs no warehouse.
+templater = jinja
+max_line_length = 120
+exclude_rules = AM04, ST06
+# AM04: allow `select *` (bronze views are intentionally select *)
+# ST06: don't force column re-ordering
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+load_macros_from_path = macros
+
+[sqlfluff:indentation]
+tab_space_size = 4
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower

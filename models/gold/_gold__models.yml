@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: Order fact table. One row per order. Revenue excludes cancelled and returned orders.
+    config:
+      contract:
+        enforced: true      # the build fails if the SQL's columns/types drift from this spec
+    constraints:
+      - type: primary_key
+        columns: [order_id]
+    columns:
+      - name: order_id
+        data_type: text
+        constraints:
+          - type: not_null
+        data_tests: [unique]
+      - name: customer_id
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: order_date
+        data_type: date
+      - name: order_status
+        data_type: text
+      - name: item_count
+        data_type: bigint
+      - name: payment_count
+        data_type: bigint
+      - name: gross_amount
+        data_type: numeric(12, 2)
+        description: Sum of quantity x unit price.
+        data_tests: [non_negative]
+      - name: paid_amount
+        data_type: numeric(12, 2)
+        description: Sum of successful payments.
+      - name: is_revenue
+        data_type: boolean
+      - name: net_revenue
+        data_type: numeric(12, 2)
+        description: gross_amount for revenue-generating orders, otherwise 0.
+      - name: updated_at
+        data_type: timestamp
+
+  - name: dim_customers
+    description: Customer dimension (current state) with lifetime order metrics and segment.
+    config:
+      contract:
+        enforced: true
+    constraints:
+      - type: primary_key
+        columns: [customer_id]
+    columns:
+      - name: customer_id
+        data_type: text
+        constraints:
+          - type: not_null
+        data_tests: [unique]
+      - name: full_name
+        data_type: text
+      - name: email
+        data_type: text
+      - name: city
+        data_type: text
+      - name: country_code
+        data_type: text
+      - name: country_name
+        data_type: text
+      - name: signup_date
+        data_type: date
+      - name: first_order_date
+        data_type: date
+      - name: last_order_date
+        data_type: date
+      - name: lifetime_orders
+        data_type: bigint
+      - name: lifetime_revenue
+        data_type: numeric(12, 2)
+      - name: customer_segment
+        data_type: text
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["vip", "active", "prospect"]
+
+  - name: dim_products
+    description: Product dimension.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: agg_daily_revenue
+    description: Daily order and revenue KPIs.
+    columns:
+      - name: order_date
+        data_tests: [unique, not_null]
+      - name: net_revenue
+        data_tests: [non_negative]
+    data_tests:
+      # the daily aggregate must reconcile back to the fact table
+      - dbt_utils.equality:
+          arguments:
+            compare_model: >
+              (select order_date, count(*) as total_orders
+               from {{ ref('fct_orders') }} group by order_date)
+            compare_columns: [order_date, total_orders]
+
+unit_tests:
+  - name: test_dim_customers_segments
+    description: Customers are segmented by lifetime net revenue.
+    model: dim_customers
+    given:
+      - input: ref('slv_customers')
+        rows:
+          - {customer_id: C1, first_name: Ada, last_name: Lovelace}
+          - {customer_id: C2, first_name: Alan, last_name: Turing}
+          - {customer_id: C3, first_name: Grace, last_name: Hopper}
+      - input: ref('fct_orders')
+        rows:
+          - {customer_id: C1, order_date: "2026-09-01", net_revenue: 450}
+          - {customer_id: C1, order_date: "2026-09-02", net_revenue: 100}
+          - {customer_id: C2, order_date: "2026-09-03", net_revenue: 20}
+    expect:
+      rows:
+        - {customer_id: C1, full_name: Ada Lovelace, lifetime_orders: 2, customer_segment: vip}
+        - {customer_id: C2, full_name: Alan Turing, lifetime_orders: 1, customer_segment: active}
+        - {customer_id: C3, full_name: Grace Hopper, lifetime_orders: 0, customer_segment: prospect}
+
+exposures:
+  - name: exec_revenue_dashboard
+    label: Exec Revenue Dashboard
+    type: dashboard
+    maturity: medium
+    description: Daily revenue dashboard used by the leadership team (e.g. Metabase / Superset).
+    owner:
+      name: Analytics Engineering
+      email: analytics@example.com
+    depends_on:
+      - ref('agg_daily_revenue')
+      - ref('dim_customers')

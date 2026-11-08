@@ -1,0 +1,46 @@
+name: medallion
+version: "1.0.0"
+config-version: 2
+profile: medallion
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
+seed-paths: ["seeds"]
+analysis-paths: ["analyses"]
+
+clean-targets: ["target", "dbt_packages", "logs"]
+
+vars:
+  # orders in these statuses don't count towards revenue
+  non_revenue_statuses: ["cancelled", "returned"]
+
+models:
+  medallion:
+    +persist_docs:
+      relation: true
+      columns: true
+
+    bronze:
+      +schema: bronze
+      +materialized: view        # 1:1 with raw, zero transformation, cheap to keep fresh
+      +tags: ["bronze"]
+
+    silver:
+      +schema: silver
+      +materialized: table       # cleaned, typed, deduplicated, conformed
+      +tags: ["silver"]
+
+    gold:
+      +schema: gold
+      +materialized: table       # business-ready star schema + aggregates
+      +tags: ["gold"]
+
+snapshots:
+  medallion:
+    +schema: snapshots
+
+seeds:
+  medallion:
+    +schema: silver              # small reference data lives alongside silver

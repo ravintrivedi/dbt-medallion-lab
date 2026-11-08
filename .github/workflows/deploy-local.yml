@@ -1,0 +1,70 @@
+# Optional (advanced): real deployment into the Postgres running on YOUR machine.
+#
+# GitHub's cloud runners can't reach your laptop, so this job runs on a
+# self-hosted runner you install locally (Settings > Actions > Runners).
+# This is the same pattern teams use to deploy into a warehouse inside a
+# private network.
+#
+# Opt-in: set repository variable LOCAL_DEPLOY = true once the runner is online
+# (otherwise the job would sit in the queue waiting for a runner).
+#
+# "Slim CD": after the first full deploy, only models whose code changed
+# (and everything downstream of them) are rebuilt, using the manifest from
+# the previous deployment as state.
+name: Deploy to local prod
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      full_refresh:
+        description: "Rebuild everything (incl. incremental models) from scratch"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-local
+  cancel-in-progress: false
+
+env:
+  DBT_TARGET: prod
+  DBT_HOST: localhost
+  DBT_PORT: "5432"
+  DBT_USER: dbt
+  DBT_PASSWORD: ${{ secrets.DBT_PASSWORD || 'dbt' }}
+  DBT_DATABASE: warehouse
+  STATE_DIR: ${{ github.workspace }}/../dbt-prod-state   # survives between runs on the runner
+
+jobs:
+  deploy:
+    if: vars.LOCAL_DEPLOY == 'true'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Python deps
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -q -r requirements.txt
+
+      - name: dbt deps
+        run: .venv/bin/dbt deps
+
+      - name: Deploy
+        run: |
+          if [ "${{ inputs.full_refresh }}" = "true" ]; then
+            echo "Full refresh deploy"
+            .venv/bin/dbt build --full-refresh
+          elif [ -f "$STATE_DIR/manifest.json" ]; then
+            echo "Slim deploy: only modified models and their children"
+            .venv/bin/dbt build --select state:modified+ --state "$STATE_DIR"
+          else
+            echo "First deploy: building everything"
+            .venv/bin/dbt build
+          fi
+
+      - name: Save state for the next deploy
+        run: |
+          mkdir -p "$STATE_DIR"
+          cp target/manifest.json "$STATE_DIR/manifest.json"
